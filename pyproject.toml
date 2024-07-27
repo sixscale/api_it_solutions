@@ -11,6 +11,8 @@ django = "^5.0.7"
 djangorestframework = "^3.15.2"
 python-dotenv = "^1.0.1"
 psycopg2-binary = "^2.9.9"
+djangorestframework-simplejwt = "^5.3.1"
+djoser = "^2.2.3"
 
 
 [build-system]

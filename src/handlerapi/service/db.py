@@ -1,10 +1,7 @@
 from django.conf import settings
 
-from . import exceptions
 from ..api.serializers import AdvertisementSerializer
 from ..models import AuthorAdvertisement, Advertisement
-from rest_framework.response import Response
-from rest_framework import status
 
 
 def get_all_ads():
@@ -29,9 +26,9 @@ def get_data_for_query_params(request):
     if filtered_params:
         try:
             params_to_convert = settings.PARAMS_TO_CONVENT
-            for key in params_to_convert:
-                if key in filtered_params:
-                    filtered_params[key] = int(filtered_params[key])
+            for param in params_to_convert:
+                if param in filtered_params:
+                    filtered_params[param] = int(filtered_params[param])
         except ValueError:
             return {"error": "ad_views, ad_id, ad_position и ad_author должны быть целыми числами."}
 
@@ -43,3 +40,12 @@ def get_data_for_query_params(request):
     serializer = AdvertisementSerializer(advertisements, many=True)
 
     return serializer.data
+
+
+def get_ad_for_editing(**kwargs):
+    ad_id = kwargs.get('id')
+    try:
+        advertisement = Advertisement.objects.get(id=ad_id)
+        return advertisement
+    except Advertisement.DoesNotExist:
+        return {"error": "Объявление не найдено с таким id."}
