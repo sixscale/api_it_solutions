@@ -106,3 +106,18 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+ALLOWED_FILTERS = [
+    'ad_title',
+    'ad_id',
+    'ad_author',
+    'ad_views',
+    'ad_position'
+]
+
+PARAMS_TO_CONVENT = [
+    'ad_views',
+    'ad_id',
+    'ad_position',
+    'ad_author'
+]

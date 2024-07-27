@@ -5,7 +5,7 @@ from rest_framework import permissions
 
 from .serializers import AdvertisementSerializer
 from ..models import Advertisement
-from ..service.db import get_or_create_author, get_data_for_query_params
+from ..service.db import get_or_create_author, get_data_for_query_params, get_all_ads
 
 
 class AdvertisementListApiView(generics.ListAPIView):
@@ -13,14 +13,12 @@ class AdvertisementListApiView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         if request.query_params:
             params_data = get_data_for_query_params(request)
-
             if isinstance(params_data, dict) and 'error' in params_data:
                 return Response(params_data, status=status.HTTP_400_BAD_REQUEST)
-
             return Response(params_data, status=status.HTTP_200_OK)
-        all_ad = Advertisement.objects.all()
-        serializer = AdvertisementSerializer(all_ad, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+
+        all_ads = get_all_ads()
+        return Response(all_ads, status=status.HTTP_200_OK)
 
 
 class CreateAdvertisementApiView(APIView):
