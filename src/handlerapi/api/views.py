@@ -1,16 +1,29 @@
+from django.conf import settings
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics
-from rest_framework import permissions
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.request import Request
+from typing import Any, Dict
+
+from rest_framework.permissions import IsAuthenticated
 
 from .serializers import AdvertisementSerializer
-from ..models import Advertisement
 from ..service.db import get_or_create_author, get_data_for_query_params, get_all_ads, get_ad_for_editing
+from users.permissions import IsOwner
 
 
 class AdvertisementListApiView(generics.ListAPIView):
-    # permission_classes = [permissions.IsAuthenticated]
-    def get(self, request, *args, **kwargs):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsOwner]
+    serializer_class = AdvertisementSerializer
+
+    @swagger_auto_schema(operation_description="Получение объявлений.",
+                         manual_parameters=settings.AUTHORIZATION + settings.MANUAL_PARAMETERS,
+                         security=[{'JWT': []}],)
+    def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         if request.query_params:
             params_data = get_data_for_query_params(request)
             if isinstance(params_data, dict) and 'error' in params_data:
@@ -22,8 +35,16 @@ class AdvertisementListApiView(generics.ListAPIView):
 
 
 class CreateAdvertisementApiView(APIView):
-    # permission_classes = [permissions.IsAuthenticated]
-    def post(self, request, *args, **kwargs):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsOwner]
+
+    @swagger_auto_schema(operation_description="Создание нового объявления.",
+                         manual_parameters=settings.AUTHORIZATION,
+                         security=[{'JWT': []}],
+                         request_body=openapi.Schema(type=openapi.TYPE_OBJECT,
+                                                     properties=settings.PROPERTIES,
+                                                     required=settings.ALLOWED_FILTERS,),)
+    def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         data = request.data
         data['ad_author'] = get_or_create_author(data['ad_author'])
         serializer = AdvertisementSerializer(data=data)
@@ -34,15 +55,18 @@ class CreateAdvertisementApiView(APIView):
 
 
 class UpdateAdvertisementApiView(APIView):
-    # permission_classes = [permissions.IsAuthenticated]
-    def put(self, request, *args, **kwargs):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsOwner]
+
+    @swagger_auto_schema(operation_description="Обновление существующего объявления.",
+                         manual_parameters=settings.AUTHORIZATION,
+                         security=[{'JWT': []}], )
+    def put(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         advertisement = get_ad_for_editing(**kwargs)
         if isinstance(advertisement, dict) and 'error' in advertisement:
             return Response(advertisement, status=status.HTTP_400_BAD_REQUEST)
 
-        data = request.data
-
-        serializer = AdvertisementSerializer(advertisement, data=data, partial=True)
+        serializer = AdvertisementSerializer(advertisement, data=request.data, partial=True)
 
         if serializer.is_valid():
             serializer.save()
@@ -53,8 +77,13 @@ class UpdateAdvertisementApiView(APIView):
 
 
 class DeleteAdvertisementApiView(APIView):
-    # permission_classes = [permissions.IsAuthenticated]
-    def delete(self, request, *args, **kwargs):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsOwner]
+
+    @swagger_auto_schema(operation_description="Удаление существующего объявления.",
+                         manual_parameters=settings.AUTHORIZATION,
+                         security=[{'JWT': []}], )
+    def delete(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         advertisement = get_ad_for_editing(**kwargs)
         if isinstance(advertisement, dict) and 'error' in advertisement:
             return Response(advertisement, status=status.HTTP_400_BAD_REQUEST)

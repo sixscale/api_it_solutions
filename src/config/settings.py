@@ -3,6 +3,7 @@ from datetime import timedelta
 from pathlib import Path
 
 from dotenv import load_dotenv
+from drf_yasg import openapi
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 load_dotenv(BASE_DIR / ".env")
@@ -21,8 +22,10 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'djoser',
+    'drf_yasg',
 
     'handlerapi',
+    'users',
 ]
 
 MIDDLEWARE = [
@@ -129,4 +132,42 @@ PARAMS_TO_CONVENT = [
     'ad_id',
     'ad_position',
     'ad_author'
+]
+
+MANUAL_PARAMETERS = [openapi.Parameter('ad_title',
+                                       openapi.IN_QUERY,
+                                       description="Заголовок объявления",
+                                       type=openapi.TYPE_STRING),
+                     openapi.Parameter('ad_id',
+                                       openapi.IN_QUERY,
+                                       description="id объявления",
+                                       type=openapi.TYPE_INTEGER),
+                     openapi.Parameter('ad_author',
+                                       openapi.IN_QUERY,
+                                       description="Автор объявления",
+                                       type=openapi.TYPE_INTEGER),
+                     openapi.Parameter('ad_views',
+                                       openapi.IN_QUERY,
+                                       description="Количество просмотров объявления",
+                                       type=openapi.TYPE_INTEGER),
+                     openapi.Parameter('ad_position',
+                                       openapi.IN_QUERY,
+                                       description="Позиция объявления",
+                                       type=openapi.TYPE_INTEGER),
+                     ]
+
+PROPERTIES = {
+    'ad_title': openapi.Schema(type=openapi.TYPE_STRING, description="Заголовок объявления"),
+    'ad_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="id объявления"),
+    'ad_author': openapi.Schema(type=openapi.TYPE_STRING, description="Автор объявления (Название автора строчкой)"),
+    'ad_views': openapi.Schema(type=openapi.TYPE_INTEGER, description="Количество просмотров объявления"),
+    'ad_position': openapi.Schema(type=openapi.TYPE_INTEGER, description="Позиция объявления"),
+}
+
+AUTHORIZATION = [
+    openapi.Parameter('Authorization',
+                      in_=openapi.IN_HEADER,
+                      description="JWT токен",
+                      type=openapi.TYPE_STRING,
+                      required=True, )
 ]
