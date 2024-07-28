@@ -133,5 +133,5 @@ Python, Django, DRF, PostgreSQL, Simple-JWT
 ```
 #### Также используется
 ```
-django-filter, psycopg2-binary, Poetry
+psycopg2-binary, Poetry
 ```
